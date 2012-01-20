@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(ros_comm)
 find_package(ROS COMPONENTS catkin genmsg cpp_common rostime
-  roscpp_serialization roscpp_traits std_msgs
+  roscpp_serialization roscpp_traits std_msgs rosunit
   )
 
 # Must export python before recursing into subdirs, so that rostest is
@@ -9,6 +9,7 @@ find_package(ROS COMPONENTS catkin genmsg cpp_common rostime
 catkin_export_python()
 
 foreach(subdir
+    tools/rostest
     messages/rosgraph_msgs
     messages/std_srvs
     utilities/xmlrpcpp

@@ -1,0 +1,36 @@
+# We need append_test_to_cache() from rosunit-extras.cmake
+find_package(ROS COMPONENTS rosunit)
+
+function(add_rostest file)
+  if(PROJECT_SOURCE_DIR)
+    find_program_required(ROSTEST_EXE rostest 
+                          PATHS @PROJECT_SOURCE_DIR@/scripts
+                          NO_DEFAULT_PATH)
+  else()
+    find_program_required(ROSTEST_EXE rostest 
+                          PATHS @CMAKE_INSTALL_PREFIX@/bin
+                          NO_DEFAULT_PATH)
+  endif()
+
+  parse_arguments(_rosunit "WORKING_DIRECTORY" "" ${ARGN})
+  if(_rosunit_WORKING_DIRECTORY)
+    set(_chdir_prefix "bash -c \"cd ${_rosunit_WORKING_DIRECTORY} && ")
+    set(_chdir_suffix "\"")
+  endif()
+
+  # Check that the file exists, #1621
+  set(_file_name _file_name-NOTFOUND)
+  if(IS_ABSOLUTE ${file})
+    set(_file_name ${file})
+  else()
+    find_file(_file_name ${file}
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}
+              NO_DEFAULT_PATH
+              NO_CMAKE_FIND_ROOT_PATH)  # for cross-compilation.  thanks jeremy.
+    if(NOT _file_name)
+      message(FATAL_ERROR "Can't find rostest file \"${file}\"")
+    endif()
+  endif()
+
+  append_test_to_cache(catkin-tests "${_chdir_prefix}${ROSTEST_EXE} --pkgdir=${PROJECT_SOURCE_DIR} --package=${PROJECT_NAME} ${_file_name}${_chdir_suffix}")
+endfunction()
