@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: server.py 15464 2011-12-29 01:29:29Z kwc $
+# Revision $Id: server.py 16175 2012-01-31 00:50:19Z kwc $
 
 """
 XML-RPC servers for parent and children
@@ -311,9 +311,6 @@ class ROSLaunchChildHandler(ROSLaunchBaseHandler):
         except roslaunch.xmlloader.XmlParseException, e:
             return -1, "ERROR: %s"%e, [[], []]
         
-        # check environment settings in config
-        rosconfig.validate()
-
         # won't actually do anything other than local, but still required
         rosconfig.assign_machines()
 
@@ -328,7 +325,7 @@ class ROSLaunchChildHandler(ROSLaunchBaseHandler):
             # enable the process monitor to exit of all processes die
             self.pm.registrations_complete()
             return 1, "launched", [ succeeded, failed ]
-        except Exception, e:
+        except Exception as e:
             return 0, "ERROR: %s"%traceback.format_exc(), [[], []]
     
 _STARTUP_TIMEOUT = 5.0 #seconds
@@ -461,7 +458,7 @@ class _ProcessListenerForwarder(ProcessListener):
     def process_died(self, process_name, exit_code):
         try:
             self.server.process_died(process_name, exit_code)
-        except Exception, e:
+        except Exception as e:
             logging.getLogger("roslaunch.remote").error(traceback.format_exc())
 
 class ROSLaunchChildNode(ROSLaunchNode):
@@ -501,7 +498,7 @@ class ROSLaunchChildNode(ROSLaunchNode):
             code, msg, _ = server.register(name, self.uri)
             if code != 1:
                 raise RLException("unable to register with roslaunch server: %s"%msg)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Exception while registering with roslaunch parent [%s]: %s"%(self.server_uri, traceback.format_exc(e)))
             # fail
             raise RLException("Exception while registering with roslaunch parent [%s]: %s"%(self.server_uri, traceback.format_exc(e)))
