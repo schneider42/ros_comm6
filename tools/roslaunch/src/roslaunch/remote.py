@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: remote.py 16175 2012-01-31 00:50:19Z kwc $
+# Revision $Id: remote.py 16229 2012-02-02 19:18:29Z kwc $
 
 """
 Integrates roslaunch remote process launching capabilities.
@@ -191,7 +191,8 @@ in your launch"""%'\n'.join([" * %s (timeout %ss)"%(m.name, m.timeout) for m in 
         for child in self.remote_processes:
             nodes = self.remote_nodes[child.machine.config_key()]
             body = '\n'.join([n.to_remote_xml() for n in nodes])
-            xml = '<launch>\n%s</launch>'%body
+            # #3799: force utf-8 encoding 
+            xml = '<?xml version="1.0" encoding="utf-8"?>\n<launch>\n%s</launch>'%body 
                 
             api = child.getapi()
             # TODO: timeouts
