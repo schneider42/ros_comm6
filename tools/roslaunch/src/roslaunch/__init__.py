@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 15697 2012-01-05 00:28:44Z kwc $
+# Revision $Id: __init__.py 16228 2012-02-02 19:04:04Z kwc $
 
 import os
 import logging
@@ -88,8 +88,13 @@ def write_pid_file(options_pid_fn, options_core, port):
             # NOTE: this assumption is not 100% valid until work on #3097 is complete
             if port is None:
                 port = DEFAULT_MASTER_PORT
-            #2987
-            pid_fn = os.path.join(rospkg.get_ros_home(), 'roscore-%s.pid'%(port))
+            # #2987
+            ros_home = rospkg.get_ros_home()
+            pid_fn = os.path.join(ros_home, 'roscore-%s.pid'%(port))
+            # #3828
+            if not os.path.exists(ros_home):
+                os.makedirs(ros_home)
+                
         with open(pid_fn, "w") as f:
             f.write(str(os.getpid()))
 

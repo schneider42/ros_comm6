@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: xmlloader.py 16175 2012-01-31 00:50:19Z kwc $
+# Revision $Id: xmlloader.py 16229 2012-02-02 19:18:29Z kwc $
 
 """
 Roslaunch XML file parser.
@@ -711,6 +711,11 @@ class XmlLoader(loader.Loader):
         try:
             if verbose:
                 print("... loading XML")
+            if hasattr(xml_text,'encode'):
+                # #3799: xml_text comes in a unicode object, which
+                # #fails since XML text is expected to be encoded.
+                # that's why force encoding to utf-8 here (make sure XML header is utf-8)
+                xml_text = xml_text.encode('utf-8')
             root = parseString(xml_text).getElementsByTagName('launch')
         except Exception as e:
             logging.getLogger('roslaunch').error("Invalid roslaunch XML syntax:\nstring[%s]\ntraceback[%s]"%(xml_text, traceback.format_exc()))
