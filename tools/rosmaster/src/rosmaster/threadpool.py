@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: threadpool.py 8327 2010-02-17 01:23:15Z kwc $
+# Revision $Id: threadpool.py 16264 2012-02-08 03:12:32Z kwc $
 
 """
 Internal threadpool library for zenmaster.
@@ -220,7 +220,7 @@ class ThreadPoolThread(threading.Thread):
                         self.__pool.remove_marker(marker)
                     if callback is not None:
                         callback(result)
-                except Exception, e:
+                except Exception as e:
                     logging.getLogger('rosmaster.threadpool').error(traceback.format_exc())
     
     def go_away(self):
