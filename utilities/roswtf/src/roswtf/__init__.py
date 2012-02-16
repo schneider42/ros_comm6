@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 15723 2012-01-05 03:37:51Z kwc $
+# Revision $Id: __init__.py 16293 2012-02-14 23:45:41Z kwc $
 
 """
 roswtf command-line tool.
@@ -95,7 +95,7 @@ def _roswtf_main():
     all_pkgs = rospack.list()
 
     import optparse
-    parser = optparse.OptionParser(usage="usage: roswtf [launch file]")
+    parser = optparse.OptionParser(usage="usage: roswtf [launch file]", description="roswtf is a tool for verifying a ROS installation and running system. Checks provided launchfile if provided, else current stack or package.")
     # #2268
     parser.add_option("--all", 
                       dest="all_packages", default=False,

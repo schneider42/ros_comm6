@@ -142,9 +142,18 @@ std_msgs/String s2
             rosmsg_cmd_packages(MODE_MSG, 'foo', ['packages', '-s'])
             val = b.getvalue().strip()
             packages2 = val.split(' ')
-            assert 'std_msgs' in packages2, packages2
+            assert 'std_msgs' in packages2
         assert set(packages1) == set(packages2), "%s vs. %s"%(packages1, packages2)
 
+    def test_rosmsg_cmd_list(self):
+        from rosmsg import rosmsg_cmd_list, MODE_MSG, MODE_SRV
+        with fakestdout() as b:
+            rosmsg_cmd_list(MODE_MSG, ['list'])
+            val = b.getvalue().strip()
+            packages1 = val.split('\n')
+            assert 'std_msgs/String' in packages1
+
+    
 from contextlib import contextmanager
 @contextmanager
 def fakestdout():
