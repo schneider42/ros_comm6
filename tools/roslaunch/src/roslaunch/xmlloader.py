@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: xmlloader.py 16229 2012-02-02 19:18:29Z kwc $
+# Revision $Id: xmlloader.py 16318 2012-02-16 20:48:03Z kwc $
 
 """
 Roslaunch XML file parser.
@@ -711,7 +711,7 @@ class XmlLoader(loader.Loader):
         try:
             if verbose:
                 print("... loading XML")
-            if hasattr(xml_text,'encode'):
+            if hasattr(xml_text,'encode') and isinstance(xml_text, unicode):
                 # #3799: xml_text comes in a unicode object, which
                 # #fails since XML text is expected to be encoded.
                 # that's why force encoding to utf-8 here (make sure XML header is utf-8)
