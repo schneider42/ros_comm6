@@ -30,13 +30,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: client.py 16327 2012-02-18 00:56:46Z kwc $
+# Revision $Id: client.py 16352 2012-02-21 01:45:22Z kwc $
 
 """
 Additional ROS client API methods.
 """
-
-
 
 import logging
 import os
@@ -45,6 +43,7 @@ import struct
 import sys
 import time
 import random
+import yaml
 
 import rosgraph
 import rosgraph.names
@@ -97,18 +96,19 @@ def load_command_line_node_params(argv):
     @param argv: [str]
     @return: param->value remappings. 
     @rtype: {str: val}
-    """    
-    mappings = {}
-    for arg in argv:
-        if rosgraph.names.REMAP in arg:
-            try:
+    @raises: ROSInitException
+    """
+    try:
+        mappings = {}
+        for arg in argv:
+            if rosgraph.names.REMAP in arg:
                 src, dst = [x.strip() for x in arg.split(rosgraph.names.REMAP)]
                 if src and dst:
                     if len(src) > 1 and src[0] == '_' and src[1] != '_':
                         mappings[src[1:]] = yaml.load(dst)
-            except:
-                sys.stderr.write("ERROR: Invalid remapping argument '%s'\n"%arg)
-    return mappings
+        return mappings
+    except Exception as e:
+        raise rospy.exceptions.ROSInitException("invalid command-line parameters: %s"%(str(e)))
 
 def on_shutdown(h):
     """
@@ -139,6 +139,8 @@ def _init_node_params(argv, node_name):
     """
     Uploads private params to the parameter server. Private params are specified
     via command-line remappings.
+
+    @raises: ROSInitException
     """
 
     # #1027: load in param name mappings

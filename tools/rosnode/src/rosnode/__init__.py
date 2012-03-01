@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 16328 2012-02-18 01:32:49Z kwc $
+# Revision $Id: __init__.py 16363 2012-02-22 19:12:47Z dthomas $
 
 """
 rosnode implements the rosnode command-line tool and also provides a
@@ -610,11 +610,11 @@ def _rosnode_cmd_machine(argv):
     elif len(args) == 0:
         machines = get_machines_by_nodes()
         machines.sort()
-        print '\n'.join(machines)
+        print('\n'.join(machines))
     else:
         nodes = get_nodes_by_machine(args[0])
         nodes.sort()
-        print '\n'.join(nodes)
+        print('\n'.join(nodes))
 
 def _rosnode_cmd_kill(argv):
     """
