@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: remoteprocess.py 16323 2012-02-18 00:30:19Z kwc $
+# Revision $Id: remoteprocess.py 16357 2012-02-21 19:29:29Z kwc $
 
 """
 Process handler for launching ssh-based roslaunch child processes.
@@ -166,7 +166,9 @@ class SSHChildROSLaunchProcess(roslaunch.server.ChildROSLaunchProcess):
             pass
         address = config_block['hostname'] or address
         username = username or config_block['user']
-        identity_file = os.path.expanduser(config_block['identityfile'])
+        identity_file = None
+        if config_block.get('identityfile', None):
+            identity_file = os.path.expanduser(config_block['identityfile'])
         #load ssh client and connect
         ssh = paramiko.SSHClient()
         err_msg = ssh_check_known_hosts(ssh, address, port, username=username, logger=_logger)
