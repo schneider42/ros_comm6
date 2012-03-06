@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: core.py 15481 2011-12-29 22:56:00Z kwc $
+# Revision $Id: core.py 16431 2012-03-01 18:49:41Z kwc $
 
 """rospy internal core implementation library"""
 
@@ -134,6 +134,9 @@ _logfatal_handlers = []
 def rospydebug(msg, *args):
     """Internal rospy client library debug logging"""
     _rospy_logger.debug(msg, *args)
+def rospyinfo(msg, *args):
+    """Internal rospy client library debug logging"""
+    _rospy_logger.info(msg, *args)
 def rospyerr(msg, *args):
     """Internal rospy client library error logging"""
     _rospy_logger.error(msg, *args)
