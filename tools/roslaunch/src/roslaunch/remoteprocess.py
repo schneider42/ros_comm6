@@ -30,14 +30,13 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: remoteprocess.py 16357 2012-02-21 19:29:29Z kwc $
+# Revision $Id: remoteprocess.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Process handler for launching ssh-based roslaunch child processes.
 """
 
 import os
-import sys
 import socket
 import traceback
 import xmlrpclib

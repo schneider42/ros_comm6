@@ -30,13 +30,13 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: scriptapi.py 11438 2010-10-07 19:27:05Z kwc $
+# Revision $Id: scriptapi.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Scripting interface for roslaunch
 """
 
-from roslaunch.core import Node, Test, Master, RLException
+from roslaunch.core import Node, Master, RLException
 
 import roslaunch.config
 import roslaunch.parent

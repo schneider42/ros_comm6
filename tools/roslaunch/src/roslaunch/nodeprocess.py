@@ -30,16 +30,14 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: nodeprocess.py 15906 2012-01-11 02:04:56Z kwc $
+# Revision $Id: nodeprocess.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Local process implementation for running and monitoring nodes.
 """
 
 import os
-import sys
 import signal
-import socket
 import subprocess 
 import time
 import traceback

@@ -41,7 +41,7 @@
 
 #define ROS_VERSION_MAJOR 1
 #define ROS_VERSION_MINOR 8
-#define ROS_VERSION_PATCH 0
+#define ROS_VERSION_PATCH 3
 #define ROS_VERSION_COMBINED(major, minor, patch) (((major) << 20) | ((minor) << 10) | (patch))
 #define ROS_VERSION ROS_VERSION_COMBINED(ROS_VERSION_MAJOR, ROS_VERSION_MINOR, ROS_VERSION_PATCH)
 
@@ -53,7 +53,7 @@
 // Import/export for windows dll's and visibility for gcc shared libraries.
 
 #ifdef ROS_BUILD_SHARED_LIBS // ros is being built around shared libraries
-  #ifdef ros_EXPORTS // we are building a shared lib/dll
+  #ifdef roscpp_EXPORTS // we are building a shared lib/dll
     #define ROSCPP_DECL ROS_HELPER_EXPORT
   #else // we are using shared lib/dll
     #define ROSCPP_DECL ROS_HELPER_IMPORT

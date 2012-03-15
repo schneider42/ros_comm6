@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: child.py 9195 2010-04-19 18:25:24Z kwc $
+# Revision $Id: child.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 ROSLaunch child server.
@@ -44,11 +44,9 @@ invoke methods on the parent to provide feedback.
 """
 
 import logging
-import sys
-import time
 import traceback
 
-import roslaunch.core 
+import roslaunch.core
 import roslaunch.pmon
 import roslaunch.server
 

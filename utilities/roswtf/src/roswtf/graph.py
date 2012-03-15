@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: graph.py 15521 2011-12-30 21:26:14Z kwc $
+# Revision $Id: graph.py 16499 2012-03-08 21:41:06Z dthomas $
 
 from __future__ import with_statement
 
@@ -113,8 +113,6 @@ def simtime_check(ctx):
             ctx.errors.append(WtfError("Cannot talk to ROS master"))
             raise WtfException("roswtf lost connection to the ROS Master at %s"%rosgraph.rosenv.get_master_uri())
 
-        if code != 1:
-            raise WtfException("cannot get published topics from master: %s"%msg)
         for topic, _ in pubtopics:
             if topic in ['/time', '/clock']:
                 return

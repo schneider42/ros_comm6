@@ -41,14 +41,11 @@ from __future__ import print_function
 import collections
 import inspect
 import os
-import platform
 import sys
-import subprocess
 import yaml
 
 import rospkg
 import genmsg
-import genpy
 
 import roslib.message
 import rosbag
@@ -70,32 +67,24 @@ MAX_DEFAULT_NON_FLOW_ITEMS = 4
 ## copied from the web, recipe for ordered yaml output ######
 def construct_ordered_mapping(self, node, deep=False):
     if not isinstance(node, yaml.MappingNode):
-        raise ConstructorError(None, None,
+        raise yaml.constructor.ConstructorError(None, None,
                 "expected a mapping node, but found %s" % node.id,
                 node.start_mark)
     mapping = collections.OrderedDict()
     for key_node, value_node in node.value:
         key = self.construct_object(key_node, deep=deep)
         if not isinstance(key, collections.Hashable):
-            raise ConstructorError("while constructing a mapping", node.start_mark,
+            raise yaml.constructor.ConstructorError("while constructing a mapping", node.start_mark,
                     "found unhashable key", key_node.start_mark)
         value = self.construct_object(value_node, deep=deep)
         mapping[key] = value
     return mapping
-
-yaml.constructor.BaseConstructor.construct_mapping = construct_ordered_mapping
-
 
 def construct_yaml_map_with_ordered_dict(self, node):
     data = collections.OrderedDict()
     yield data
     value = self.construct_mapping(node)
     data.update(value)
-
-yaml.constructor.Constructor.add_constructor(
-        'tag:yaml.org,2002:map',
-        construct_yaml_map_with_ordered_dict)
-
 
 def represent_ordered_mapping(self, tag, mapping, flow_style=None):
     value = []
@@ -120,11 +109,6 @@ def represent_ordered_mapping(self, tag, mapping, flow_style=None):
             node.flow_style = best_style
     return node
 
-if "OrderedDict" in collections.__dict__:
-    yaml.representer.BaseRepresenter.represent_mapping = represent_ordered_mapping
-    yaml.representer.Representer.add_representer(collections.OrderedDict,
-                                                 yaml.representer.SafeRepresenter.represent_dict)
-
 ## end recipe for ordered yaml output ######
 
 
@@ -136,7 +120,6 @@ def get_array_type_instance(field_type, default_package = None):
     field_type = field_type.strip().rstrip("[]")
     if field_type == "empty":
         return None
-    is_std_msg = False
     if not "/" in field_type:
         # is either built-in, Header, or in same package
         # it seems built-in types get a priority
@@ -258,7 +241,19 @@ def create_names_filter(names):
     return lambda obj : filter(lambda slotname : not slotname in names, obj.__slots__)
 
 
+def init_rosmsg_proto():
+    if "OrderedDict" in collections.__dict__:
+        yaml.constructor.BaseConstructor.construct_mapping = construct_ordered_mapping
+        yaml.constructor.Constructor.add_constructor(
+            'tag:yaml.org,2002:map',
+            construct_yaml_map_with_ordered_dict)
+
+        yaml.representer.BaseRepresenter.represent_mapping = represent_ordered_mapping
+        yaml.representer.Representer.add_representer(collections.OrderedDict,
+                                                     yaml.representer.SafeRepresenter.represent_dict)
+    
 def rosmsg_cmd_prototype(args):
+    init_rosmsg_proto()
     parser = OptionParser(usage="usage: rosmsgproto msg/srv [options]",
                           description="Produces output or a msg or service request, intended for tab completion support.")
     parser.add_option("-f","--flow_style",

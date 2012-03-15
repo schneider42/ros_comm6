@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: launch.py 15906 2012-01-11 02:04:56Z kwc $
+# Revision $Id: launch.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Top-level implementation of launching processes. Coordinates
@@ -50,9 +50,8 @@ import rosgraph.network
 
 from roslaunch.core import *
 #from roslaunch.core import setup_env
-from roslaunch.config import ROSLaunchConfig
 from roslaunch.nodeprocess import create_master_process, create_node_process
-from roslaunch.pmon import start_process_monitor, ProcessListener, FatalProcessLaunch
+from roslaunch.pmon import start_process_monitor, ProcessListener
 
 from roslaunch.rlutil import update_terminal_name
 

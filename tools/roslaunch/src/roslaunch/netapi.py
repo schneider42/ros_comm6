@@ -30,13 +30,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: netapi.py 15494 2011-12-30 00:12:34Z kwc $
+# Revision $Id: netapi.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Convience methods for manipulating XML-RPC APIs
 """
 
-import socket
 import xmlrpclib
 
 import rosgraph
