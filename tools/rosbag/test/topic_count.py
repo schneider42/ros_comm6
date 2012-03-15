@@ -1,6 +1,7 @@
+#!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2009, Willow Garage, Inc.
+# Copyright (c) 2008, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,28 +30,37 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
 
+import roslib
+roslib.load_manifest('rosbag')
+
+import unittest
+import rostest
 import sys
+import time
+import subprocess
 
-from . rosenv import get_master_uri, ROS_MASTER_URI, ROS_NAMESPACE, ROS_HOSTNAME, ROS_IP
-from . masterapi import Master, MasterFailure, MasterError, MasterException
-from . masterapi import is_online as is_master_online
+class TopicCount(unittest.TestCase):
 
-# bring in names submodule
-from . import names
+  def test_topic_count(self):
+    # Wait while the recorder creates a bag for us to examine
+    time.sleep(10.0)
 
-def myargv(argv=None):
-    """
-    Remove ROS remapping arguments from sys.argv arguments.
-    
-    :returns: copy of sys.argv with ROS remapping arguments removed, ``[str]``
-    """
-    if argv is None:
-        argv = sys.argv
-    return [a for a in argv if not names.REMAP in a]
+    # Check the topic count returned by `rosbag info`
+    # We could probably do this through the rosbag Python API...
+    cmd = ['rosbag', 'info', 
+           '/tmp/test_rosbag_record_one_publisher_two_topics.bag',
+           '-y', '-k', 'topics']
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out,err = p.communicate()
+    topic_count = 0
+    for l in out.split('\n'):
+        f = l.strip().split(': ')
+        if len(f) == 2 and f[0] == '- topic':
+            topic_count += 1
 
-__all__ = ['myargv',
-        'get_master_uri', 'ROS_MASTER_URI', 'ROS_NAMESPACE', 'ROS_HOSTNAME', 'ROS_IP',
-        'Master', 'MasterFailure', 'MasterError', 'MasterException',
-        'is_master_online']
+    self.assertEqual(topic_count, 2)
 
+if __name__ == '__main__':
+  rostest.unitrun('test_rosbag', 'topic_count', TopicCount, sys.argv)

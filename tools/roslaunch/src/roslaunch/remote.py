@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: remote.py 16229 2012-02-02 19:18:29Z kwc $
+# Revision $Id: remote.py 16525 2012-03-14 04:07:41Z kwc $
 
 """
 Integrates roslaunch remote process launching capabilities.
@@ -38,7 +38,6 @@ Integrates roslaunch remote process launching capabilities.
 
 import logging
 import socket
-import sys
 import time
 
 import rosgraph.network as network

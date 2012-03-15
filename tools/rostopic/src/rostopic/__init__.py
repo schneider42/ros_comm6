@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 15719 2012-01-05 02:41:24Z kwc $
+# Revision $Id: __init__.py 16525 2012-03-14 04:07:41Z kwc $
 
 # make sure we aren't using floor division
 from __future__ import division, print_function
@@ -40,7 +40,6 @@ NAME='rostopic'
 
 import os
 import sys
-import itertools
 import math
 import socket
 import time

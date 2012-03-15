@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: simtime.py 15131 2011-10-06 03:07:40Z kwc $
+# Revision $Id: simtime.py 16511 2012-03-09 19:56:16Z kwc $
 
 """Internal-use: Support for simulated clock."""
 
@@ -82,7 +82,7 @@ def init_simtime():
             global _rostime_sub, _clock_sub
             if _rostime_sub is None:
                 logger.info("initializing %s core topic"%_ROSCLOCK)
-                _clock_sub = rospy.topics.Subscriber(_ROSCLOCK, Clock, _set_rostime_clock_wrapper)
+                _clock_sub = rospy.topics.Subscriber(_ROSCLOCK, Clock, _set_rostime_clock_wrapper, queue_size=1)
                 logger.info("connected to core topic %s"%_ROSCLOCK)
 
                 _set_rostime(rospy.rostime.Time(0, 0))
