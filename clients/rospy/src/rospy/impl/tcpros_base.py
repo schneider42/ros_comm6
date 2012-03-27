@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: tcpros_base.py 15719 2012-01-05 02:41:24Z kwc $
+# Revision $Id: tcpros_base.py 16546 2012-03-19 18:00:34Z kwc $
 
 """Internal use: common TCPROS libraries"""
 
@@ -332,7 +332,7 @@ class TCPROSServer(object):
                     write_ros_handshake_header(sock, {'error' : 'node shutting down'})
                     return
         except rospy.exceptions.TransportInitError as e:
-            logwarn(str(e))
+            rospywarn(str(e))
             if sock is not None:
                 sock.close()
         except Exception as e:

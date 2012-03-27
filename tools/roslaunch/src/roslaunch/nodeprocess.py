@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: nodeprocess.py 16525 2012-03-14 04:07:41Z kwc $
+# Revision $Id: nodeprocess.py 16568 2012-03-21 21:21:14Z kruset $
 
 """
 Local process implementation for running and monitoring nodes.
@@ -333,20 +333,17 @@ executable permission. This is often caused by a bad launch-prefix."""%(msg, ' '
         @return: human-readable description of exit state 
         @rtype: str
         """
-        # #973: include location of output location in message
-        if self.exit_code is not None:
-            if self.exit_code:
-                if self.log_dir:
-                    return 'process has died [pid %s, exit code %s].\nlog files: %s*.log'%(self.pid, self.exit_code, os.path.join(self.log_dir, self._log_name()))
-                else:
-                    return 'process has died [pid %s, exit code %s]'%(self.pid, self.exit_code)
-            else:
-                if self.log_dir:
-                    return 'process has finished cleanly.\nlog file: %s*.log'%(os.path.join(self.log_dir, self._log_name()))
-                else:
-                    return 'process has finished cleanly'
+        if self.exit_code is None:
+            output = 'process has died without exit code [pid %s, cmd %s].'%(self.pid, ' '.join(self.args))
+        elif self.exit_code != 0:
+            output = 'process has died [pid %s, exit code %s, cmd %s].'%(self.pid, self.exit_code, ' '.join(self.args))
         else:
-            return 'process has died'
+            output = 'process has finished cleanly'
+                
+        if self.log_dir:
+            # #973: include location of output location in message
+            output += '\nlog file: %s*.log'%(os.path.join(self.log_dir, self._log_name()))
+        return output
 
     def _stop_unix(self, errors):
         """

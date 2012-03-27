@@ -48,6 +48,8 @@ import rospkg
 import rosgraph
 
 import roslaunch.core
+import roslaunch.config
+import roslaunch.depends
 from rosmaster import DEFAULT_MASTER_PORT
 
 def check_log_disk_usage():
@@ -185,12 +187,11 @@ def check_roslaunch(f):
     """
     try:
         rl_config = roslaunch.config.load_config_default([f], DEFAULT_MASTER_PORT, verbose=False)
-    except roslaunch.RLException as e:
+    except roslaunch.core.RLException as e:
         return str(e)
     
     errors = []
     # check for missing deps
-    import roslaunch.depends
     base_pkg, file_deps, missing = roslaunch.depends.roslaunch_deps([f])
     for pkg, miss in missing.iteritems():
         if miss:
