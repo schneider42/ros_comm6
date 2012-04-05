@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 16525 2012-03-14 04:07:41Z kwc $
+# Revision $Id: __init__.py 16612 2012-04-04 22:18:07Z kwc $
 
 # make sure we aren't using floor division
 from __future__ import division, print_function
@@ -47,6 +47,7 @@ import traceback
 import yaml
 import xmlrpclib
 
+from operator import itemgetter
 from urlparse import urlparse
 
 import genpy
@@ -301,8 +302,9 @@ def _get_topic_type(topic):
     matches = [(t, t_type) for t, t_type in val if t == topic]
     if not matches:
         matches = [(t, t_type) for t, t_type in val if topic.startswith(t+'/')]
+        # choose longest match
+        matches.sort(key=itemgetter(0), reverse=True)
     if matches:
-        #TODO logic for multiple matches if we are prefix matching
         t, t_type = matches[0]
         if t_type == rosgraph.names.ANYTYPE:
             return None, None, None
