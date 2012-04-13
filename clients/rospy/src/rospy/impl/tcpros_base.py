@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: tcpros_base.py 16546 2012-03-19 18:00:34Z kwc $
+# Revision $Id: tcpros_base.py 16645 2012-04-13 16:03:54Z kwc $
 
 """Internal use: common TCPROS libraries"""
 
@@ -332,7 +332,7 @@ class TCPROSServer(object):
                     write_ros_handshake_header(sock, {'error' : 'node shutting down'})
                     return
         except rospy.exceptions.TransportInitError as e:
-            rospywarn(str(e))
+            logwarn(str(e))
             if sock is not None:
                 sock.close()
         except Exception as e:
@@ -440,6 +440,10 @@ class TCPROSTransport(Transport):
         # #1852 have to hold onto latched messages on subscriber side
         self.is_latched = False
         self.latch = None
+
+        # save the fileno separately so we can garbage collect the
+        # socket but still unregister will poll objects
+        self._fileno = None
         
         # these fields are actually set by the remote
         # publisher/service. they are set for tools that connect
@@ -447,6 +451,12 @@ class TCPROSTransport(Transport):
         self.md5sum = None
         self.type = None 
             
+    def fileno(self):
+        """
+        Get descriptor for select
+        """
+        return self._fileno
+        
     def set_socket(self, sock, endpoint_id):
         """
         Set the socket for this transport
@@ -460,6 +470,7 @@ class TCPROSTransport(Transport):
             raise TransportInitError("socket already initialized")
         self.socket = sock
         self.endpoint_id = endpoint_id
+        self._fileno = sock.fileno()
 
     def connect(self, dest_addr, dest_port, endpoint_id, timeout=None):
         """
@@ -504,14 +515,20 @@ class TCPROSTransport(Transport):
             rospyerr("Unable to initiate TCP/IP socket to %s:%s (%s): %s"%(dest_addr, dest_port, endpoint_id, traceback.format_exc()))            
             raise
         except Exception as e:
+            #logerr("Unknown error initiating TCP/IP socket to %s:%s (%s): %s"%(dest_addr, dest_port, endpoint_id, str(e)))
+            rospywarn("Unknown error initiating TCP/IP socket to %s:%s (%s): %s"%(dest_addr, dest_port, endpoint_id, traceback.format_exc()))            
+
             # FATAL: no reconnection as error is unknown
             self.done = True
             if self.socket:
-                self.socket.close()
+                try:
+                    self.socket.shutdown(socket.SHUT_RDWR)
+                except:
+                    pass
+                finally:
+                    self.socket.close()
             self.socket = None
             
-            #logerr("Unknown error initiating TCP/IP socket to %s:%s (%s): %s"%(dest_addr, dest_port, endpoint_id, str(e)))
-            rospywarn("Unknown error initiating TCP/IP socket to %s:%s (%s): %s"%(dest_addr, dest_port, endpoint_id, traceback.format_exc()))            
             raise TransportInitError(str(e)) #re-raise i/o error
                 
     def _validate_header(self, header):
@@ -534,23 +551,32 @@ class TCPROSTransport(Transport):
 
     def write_header(self):
         """Writes the TCPROS header to the active connection."""
-        sock = self.socket
         # socket may still be getting spun up, so wait for it to be writable
+        sock = self.socket
+        protocol = self.protocol
+        # race condition on close, better fix is to pass these in,
+        # functional style, but right now trying to cause minimal
+        # perturbance to codebase.
+        if sock is None or protocol is None:
+            return
         fileno = sock.fileno()
         ready = None
         while not ready:
             _, ready, _ = select.select([], [fileno], [])
         logger.debug("[%s]: writing header", self.name)
         sock.setblocking(1)
-        self.stat_bytes += write_ros_handshake_header(sock, self.protocol.get_header_fields())
+        self.stat_bytes += write_ros_handshake_header(sock, protocol.get_header_fields())
 
     def read_header(self):
         """
         Read TCPROS header from active socket
         @raise TransportInitError if header fails to validate
         """
-        self.socket.setblocking(1)
-        self._validate_header(read_ros_handshake_header(self.socket, self.read_buff, self.protocol.buff_size))
+        sock = self.socket
+        if sock is None:
+            return
+        sock.setblocking(1)
+        self._validate_header(read_ros_handshake_header(sock, self.read_buff, self.protocol.buff_size))
                 
     def send_message(self, msg, seq):
         """
@@ -699,7 +725,12 @@ class TCPROSTransport(Transport):
                     # set socket to None so we reconnect
                     try:
                         if self.socket is not None:
-                            self.socket.close()
+                            try:
+                                self.socket.shutdown()
+                            except:
+                                pass
+                            finally:
+                                self.socket.close()
                     except:
                         pass
                     self.socket = None
@@ -725,11 +756,16 @@ class TCPROSTransport(Transport):
 
     def close(self):
         """close i/o and release resources"""
-        self.done = True
-        try:        
-            if self.socket is not None:
-                self.socket.close()
-        finally:
-            self.socket = self.read_buff = self.write_buff = self.protocol = None
-            super(TCPROSTransport, self).close()
+        if not self.done:
+            try:
+                if self.socket is not None:
+                    try:
+                        self.socket.shutdown(socket.SHUT_RDWR)
+                    except:
+                        pass
+                    finally:
+                        self.socket.close()
+            finally:
+                self.socket = self.read_buff = self.write_buff = self.protocol = None
+                super(TCPROSTransport, self).close()
 

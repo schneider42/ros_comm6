@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: transport.py 9434 2010-04-28 00:20:16Z kwc $
+# Revision $Id: transport.py 16619 2012-04-06 00:28:27Z kwc $
 """
 Base classes for rospy transports
 
@@ -78,6 +78,12 @@ class Transport(object):
         self.stat_bytes   = 0
         # Number of messages that have passed through this transport
         self.stat_num_msg = 0         
+    
+    def fileno(self):
+        """
+        Get a file descriptor for select() if available
+        """
+        return None
     
     ## callback function to invoke when this connection is
     ## closed. Function will be passed this transport as an argument.
