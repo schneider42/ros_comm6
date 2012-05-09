@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, Morgan Quigley and Willow Garage, Inc.
+ * Copyright (C) 2008, Willow Garage, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,49 +25,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ROSCPP_COMMON_H
-#define ROSCPP_COMMON_H
+#ifndef TOPIC_TOOLS_MACROS_H_
+#define TOPIC_TOOLS_MACROS_H_
 
-#include <stdint.h>
-#include <assert.h>
-#include <stddef.h>
-#include <string>
-
-#include "ros/assert.h"
-#include "ros/forwards.h"
-#include "ros/serialized_message.h"
-
-#include <boost/shared_array.hpp>
-
-#define ROS_VERSION_MAJOR 1
-#define ROS_VERSION_MINOR 8
-#define ROS_VERSION_PATCH 8
-#define ROS_VERSION_COMBINED(major, minor, patch) (((major) << 20) | ((minor) << 10) | (patch))
-#define ROS_VERSION ROS_VERSION_COMBINED(ROS_VERSION_MAJOR, ROS_VERSION_MINOR, ROS_VERSION_PATCH)
-
-#define ROS_VERSION_GE(major1, minor1, patch1, major2, minor2, patch2) (ROS_VERSION_COMBINED(major1, minor1, patch1) >= ROS_VERSION_COMBINED(major2, minor2, patch2))
-#define ROS_VERSION_MINIMUM(major, minor, patch) ROS_VERSION_GE(ROS_VERSION_MAJOR, ROS_VERSION_MINOR, ROS_VERSION_PATCH, major, minor, patch)
-
-#include <ros/macros.h>
+#include <ros/macros.h> // for the DECL's
 
 // Import/export for windows dll's and visibility for gcc shared libraries.
 
 #ifdef ROS_BUILD_SHARED_LIBS // ros is being built around shared libraries
-  #ifdef roscpp_EXPORTS // we are building a shared lib/dll
-    #define ROSCPP_DECL ROS_HELPER_EXPORT
+  #ifdef topic_tools_EXPORTS // we are building a shared lib/dll
+    #define TOPIC_TOOLS_DECL ROS_HELPER_EXPORT
   #else // we are using shared lib/dll
-    #define ROSCPP_DECL ROS_HELPER_IMPORT
+    #define TOPIC_TOOLS_DECL ROS_HELPER_IMPORT
   #endif
 #else // ros is being built around static libraries
-  #define ROSCPP_DECL
+  #define TOPIC_TOOLS_DECL
 #endif
 
-namespace ros
-{
-
-void disableAllSignalsInThisThread();
-
-}
-
-#endif
+#endif /* TOPIC_TOOLS_MACROS_H_ */
 

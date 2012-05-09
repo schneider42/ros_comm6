@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 16525 2012-03-14 04:07:41Z kwc $
+# Revision $Id: __init__.py 16672 2012-04-27 16:16:28Z dthomas $
 
 """
 rosnode implements the rosnode command-line tool and also provides a
@@ -740,7 +740,7 @@ Commands:
 Type rosnode <command> -h for more detailed usage, e.g. 'rosnode ping -h'
 """)
     if return_error:
-        sys.exit(os.EX_USAGE)
+        sys.exit(getattr(os, 'EX_USAGE', 1))
     else:
         sys.exit(0)
 
