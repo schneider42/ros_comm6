@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: graph.py 15473 2011-12-29 21:01:15Z kwc $
+# Revision $Id: graph.py 16696 2012-05-08 22:35:44Z dthomas $
 
 from __future__ import print_function
 
@@ -171,7 +171,7 @@ class EdgeList(object):
             return [map[k] for k in map.iterkeys() if k.startswith(pref)]
         
         pref = node+"|"
-        edge_lists = matching(self.edges_by_start, pref) + matching(self.edges_by_start, pref)
+        edge_lists = matching(self.edges_by_start, pref) + matching(self.edges_by_end, pref)
         for el in edge_lists:
             for e in el:
                 self.delete(e)
@@ -457,18 +457,15 @@ class Graph(object):
 
     def _node_uri_refresh(self, node):
         try:
-            code, msg, uri = self.master.lookupNode(node)
+            uri = self.master.lookupNode(node)
         except:
-            code = -1
             msg = traceback.format_exc()
-        if code != 1:
             logger.warn("master reported error in node lookup: %s"%msg)
             return None
-        else:
-            # update maps
-            self.node_uri_map[node] = uri
-            self.uri_node_map[uri] = node
-            return uri
+        # update maps
+        self.node_uri_map[node] = uri
+        self.uri_node_map[uri] = node
+        return uri
     
     def _node_uri_refresh_all(self):
         """

@@ -31,7 +31,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Revision $Id: __init__.py 16612 2012-04-04 22:18:07Z kwc $
+# Revision $Id: __init__.py 16672 2012-04-27 16:16:28Z dthomas $
 
 # make sure we aren't using floor division
 from __future__ import division, print_function
@@ -1619,7 +1619,7 @@ Commands:
 
 Type rostopic <command> -h for more detailed usage, e.g. 'rostopic echo -h'
 """)
-    sys.exit(os.EX_USAGE)
+    sys.exit(getattr(os, 'EX_USAGE', 1))
 
 def rostopicmain(argv=None):
     import rosbag
