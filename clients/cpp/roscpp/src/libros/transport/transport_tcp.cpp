@@ -296,7 +296,33 @@ bool TransportTCP::listen(int port, int backlog, const AcceptCallback& accept_cb
   is_server_ = true;
   accept_cb_ = accept_cb;
 
-  sock_ = socket(AF_INET, SOCK_STREAM, 0);
+  socklen_t len;
+  struct sockaddr *address;
+
+  char *ros_ipv6 = NULL;
+  #ifdef _MSC_VER
+    _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
+  #else
+    ros_ipv6 = getenv("ROS_IPV6");
+  #endif
+  if (ros_ipv6)
+  {
+    sock_ = socket(AF_INET6, SOCK_STREAM, 0);
+    v6server_address_.sin6_family = AF_INET6;
+    v6server_address_.sin6_addr = in6addr_any;
+    v6server_address_.sin6_port = htons(port);
+    len = sizeof(v6server_address_);
+    address = (sockaddr*)&v6server_address_;
+  }
+  else
+  {
+    sock_ = socket(AF_INET, SOCK_STREAM, 0);
+    server_address_.sin_family = AF_INET;
+    server_address_.sin_addr.s_addr = INADDR_ANY;
+    server_address_.sin_port = htons(port);
+    len = sizeof(server_address_);
+    address = (sockaddr*) &server_address_;
+  }
 
   if (sock_ <= 0)
   {
@@ -304,17 +330,14 @@ bool TransportTCP::listen(int port, int backlog, const AcceptCallback& accept_cb
     return false;
   }
 
-  server_address_.sin_family = AF_INET;
-  server_address_.sin_port = htons(port);
-  server_address_.sin_addr.s_addr = INADDR_ANY;
-  if (bind(sock_, (sockaddr *)&server_address_, sizeof(server_address_)) < 0)
+
+  if (bind(sock_, address, len) < 0)
   {
     ROS_ERROR("bind() failed with error [%s]", last_socket_error_string());
     return false;
   }
 
   ::listen(sock_, backlog);
-  socklen_t len = sizeof(server_address_);
   getsockname(sock_, (sockaddr *)&server_address_, &len);
   server_port_ = ntohs(server_address_.sin_port);
 

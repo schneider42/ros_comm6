@@ -46,6 +46,7 @@ extern "C" {
 # include <errno.h>
 # include <fcntl.h>
 # include <string.h>
+# include <stdlib.h>
 }
 #endif  // _WINDOWS
 
@@ -91,7 +92,20 @@ int
 XmlRpcSocket::socket()
 {
   initWinSock();
-  return (int) ::socket(AF_INET, SOCK_STREAM, 0);
+  char *ros_ipv6 = NULL;
+  #ifdef _MSC_VER
+    _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
+  #else
+    ros_ipv6 = getenv("ROS_IPV6");
+  #endif
+  if (ros_ipv6)
+  {
+    return (int) ::socket(AF_INET6, SOCK_STREAM, 0);
+  }
+  else
+  {
+    return (int) ::socket(AF_INET, SOCK_STREAM, 0);
+  }
 }
 
 
@@ -135,11 +149,39 @@ bool
 XmlRpcSocket::bind(int fd, int port)
 {
   struct sockaddr_in saddr;
-  memset(&saddr, 0, sizeof(saddr));
-  saddr.sin_family = AF_INET;
-  saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  saddr.sin_port = htons((u_short) port);
-  return (::bind(fd, (struct sockaddr *)&saddr, sizeof(saddr)) == 0);
+  struct sockaddr_in6 v6saddr;
+
+  
+
+  char *ros_ipv6 = NULL;
+  socklen_t len;
+  struct sockaddr *address;
+
+  #ifdef _MSC_VER
+    _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
+  #else
+    ros_ipv6 = getenv("ROS_IPV6");
+  #endif
+  if (ros_ipv6)
+  {
+    memset(&v6saddr, 0, sizeof(v6saddr));
+    v6saddr.sin6_family = AF_INET6;
+    v6saddr.sin6_addr = in6addr_any;
+    v6saddr.sin6_port = htons((u_short) port);
+    len = sizeof(v6saddr);
+    address = (sockaddr*) &v6saddr;
+  }
+  else
+  {
+    memset(&saddr, 0, sizeof(saddr));
+    saddr.sin_family = AF_INET;
+    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    saddr.sin_port = htons((u_short) port);
+    len = sizeof(saddr);
+    address = (sockaddr*) &saddr;
+  }
+
+  return (::bind(fd, address, len) == 0);
 }
 
 

@@ -146,6 +146,10 @@ private:
 
   bool is_server_;
   sockaddr_in server_address_;
+
+  //TODO: unify INET and INET6 structs
+  sockaddr_in6 v6server_address_;
+
   int server_port_;
   AcceptCallback accept_cb_;
 
