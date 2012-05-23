@@ -103,14 +103,15 @@ def wait_for_service(service, timeout=None):
             return False
 
         addr = rospy.core.parse_rosrpc_uri(uri)
-        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rospy/impl/tcpros_service.py 107')
-        print('converted to INET6')
-        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)            
+        if rosgraph.network.use_ipv6():
+            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             # we always want to timeout just in case we're connecting
             # to a down service.
             s.settimeout(timeout)
-            print 'connecting to', addr
+            #print 'connecting to', addr
             s.connect(addr)
             h = { 'probe' : '1', 'md5sum' : '*',
                   'callerid' : rospy.core.get_caller_id(),

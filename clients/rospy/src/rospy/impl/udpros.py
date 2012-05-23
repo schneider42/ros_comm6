@@ -68,14 +68,14 @@ class UDPROSHandler(rospy.transport.ProtocolHandler):
         """
         if self.server is not None:
             return
-        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rospy/impl/udpros.py 72')
-        print('converted to INET6')
-
-        s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+        if rosgraph.network.use_ipv6():
+            s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
         s.bind((rosgraph.network.get_bind_address(), self.port))
         if self.port == 0:
             self.port = s.getsockname()[1]
-        print 'binding udp socket to', (rosgraph.network.get_bind_address(), self.port)
+        #print 'bound udp socket to', (rosgraph.network.get_bind_address(), self.port)
         self.server = s
         threading.start_new_thread(self.run, ())
 
