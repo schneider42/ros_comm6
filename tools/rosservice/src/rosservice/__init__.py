@@ -106,14 +106,15 @@ def get_service_headers(service_name, service_uri):
         dest_addr, dest_port = rospy.parse_rosrpc_uri(service_uri)
     except:
         raise ROSServiceException("service [%s] has an invalid RPC URI [%s]"%(service_name, service_uri))
-    print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rosservice/__init__.py 110')
-    print('converted to INET6')
-    s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    if rosgraph.network.use_ipv6():
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    else:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         try:
             # connect to service and probe it to get the headers
             s.settimeout(5.0)
-            print('connecting to %s : %d'%(dest_addr, dest_port))
+            #print('connecting to %s : %d'%(dest_addr, dest_port))
             s.connect((dest_addr, dest_port))
             header = { 'probe':'1', 'md5sum':'*',
                        'callerid':'/rosservice', 'service':service_name}
