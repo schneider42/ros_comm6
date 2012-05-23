@@ -186,6 +186,7 @@ def get_local_addresses():
         # see http://alastairs-place.net/netifaces/
         for i in netifaces.interfaces():
             try:
+                print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rosgraph/network.py 190')
                 local_addrs.extend([d['addr'] for d in netifaces.ifaddresses(i)[netifaces.AF_INET]])
             except KeyError: pass
     elif _is_unix_like_platform():
@@ -206,6 +207,7 @@ def get_local_addresses():
         # according to http://docs.python.org/library/fcntl.html, the buffer limit is 1024 bytes
         buff = array.array('B', '\0' * max_bytes)
         # serialize the buffer length and address to ioctl
+        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rosgraph/network.py 211')
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)        
         info = fcntl.ioctl(sock.fileno(), SIOCGIFCONF,
                            struct.pack('iL', max_bytes, buff.buffer_info()[0]))
@@ -247,7 +249,8 @@ def get_bind_address(address=None):
         #localhost or 127/8
         return '127.0.0.1' #loopback
     else:
-        return '0.0.0.0'
+        return '::'
+    return ''
 
 # #528: semi-complicated logic for determining XML-RPC URI
 def get_host_name():

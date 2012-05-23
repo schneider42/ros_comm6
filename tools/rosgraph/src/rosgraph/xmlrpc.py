@@ -45,6 +45,7 @@ The common entry point for most libraries is the L{XmlRpcNode} class.
 import logging
 import select
 import socket
+import fcntl
 
 try:
     import _thread
@@ -93,7 +94,23 @@ class ThreadingXMLRPCServer(socketserver.ThreadingMixIn, SimpleXMLRPCServer):
         # to True to allow quick restart on the same port.  This is equivalent 
         # to calling setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
         self.allow_reuse_address = True
-        SimpleXMLRPCServer.__init__(self, addr, SilenceableXMLRPCRequestHandler, log_requests)
+        SimpleXMLRPCServer.__init__(self, addr, SilenceableXMLRPCRequestHandler, log_requests,  bind_and_activate=False)
+        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rosgraph/xmlrpc.py 100')
+        print('converted to INET6')
+        self.address_family = socket.AF_INET6
+        self.socket = socket.socket(self.address_family,
+                                    self.socket_type)
+        print('binding xmlrpc socket to', addr)
+        self.server_bind()
+        self.server_activate()
+        print('bound to', self.socket.getsockname()[0:2])
+        # [Bug #1222790] If possible, set close-on-exec flag; if a
+        # method spawns a subprocess, the subprocess shouldn't have
+        # the listening socket open.
+        if fcntl is not None and hasattr(fcntl, 'FD_CLOEXEC'):
+            flags = fcntl.fcntl(self.fileno(), fcntl.F_GETFD)
+            flags |= fcntl.FD_CLOEXEC
+            fcntl.fcntl(self.fileno(), fcntl.F_SETFD, flags)
 
     def handle_error(self, request, client_address):
         """
@@ -210,7 +227,7 @@ class XmlRpcNode(object):
             port = self.port or 0 #0 = any
 
             bind_address = rosgraph.network.get_bind_address()
-            logger.info("XML-RPC server binding to %s"%bind_address)
+            logger.info("XML-RPC server binding to %s:%d"%(bind_address, port))
             
             self.server = ThreadingXMLRPCServer((bind_address, port), log_requests)
             self.port = self.server.server_address[1] #set the port to whatever server bound to

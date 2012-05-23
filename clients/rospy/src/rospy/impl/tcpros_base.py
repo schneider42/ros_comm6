@@ -187,10 +187,14 @@ class TCPServer(object):
         binds the server socket. ROS_IP/ROS_HOSTNAME may restrict
         binding to loopback interface.
         """
-        server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rospy/impl/tcpros_base.py 191')
+        print 'converted to INET6'
+        server_sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print 'binding to',(rosgraph.network.get_bind_address(), self.port)
         server_sock.bind((rosgraph.network.get_bind_address(), self.port))
-        (self.addr, self.port) = server_sock.getsockname()
+        (self.addr, self.port) = server_sock.getsockname()[0:2]
+        print 'bound to', (self.addr, self.port)
         server_sock.listen(5)
         return server_sock
 
@@ -490,8 +494,9 @@ class TCPROSTransport(Transport):
         try:
             self.endpoint_id = endpoint_id
             self.dest_address = (dest_addr, dest_port)
-            
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rospy/impl/tcpros_base.py 494')
+            print('convreted to INET6')
+            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             if _is_use_tcp_keepalive():
                 # OSX (among others) does not define these options
                 if hasattr(socket, 'TCP_KEEPCNT') and \
@@ -508,6 +513,7 @@ class TCPROSTransport(Transport):
             if timeout is not None:
                 s.settimeout(timeout)
             self.socket = s
+            print 'connecting to', (dest_addr, dest_port)
             self.socket.connect((dest_addr, dest_port))
             self.write_header()
             self.read_header()
