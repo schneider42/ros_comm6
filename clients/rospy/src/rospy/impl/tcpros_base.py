@@ -192,10 +192,10 @@ class TCPServer(object):
         else:
             server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        #print 'binding to',(rosgraph.network.get_bind_address(), self.port)
+        print 'binding to',(rosgraph.network.get_bind_address(), self.port)
         server_sock.bind((rosgraph.network.get_bind_address(), self.port))
         (self.addr, self.port) = server_sock.getsockname()[0:2]
-        #print 'bound to', (self.addr, self.port)
+        print 'bound to', (self.addr, self.port)
         server_sock.listen(5)
         return server_sock
 
@@ -515,7 +515,7 @@ class TCPROSTransport(Transport):
             if timeout is not None:
                 s.settimeout(timeout)
             self.socket = s
-            #print 'connecting to', (dest_addr, dest_port)
+            print 'connecting to', (dest_addr, dest_port)
             self.socket.connect((dest_addr, dest_port))
             self.write_header()
             self.read_header()

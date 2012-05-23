@@ -111,7 +111,7 @@ def wait_for_service(service, timeout=None):
             # we always want to timeout just in case we're connecting
             # to a down service.
             s.settimeout(timeout)
-            #print 'connecting to', addr
+            print 'connecting to', addr
             s.connect(addr)
             h = { 'probe' : '1', 'md5sum' : '*',
                   'callerid' : rospy.core.get_caller_id(),
