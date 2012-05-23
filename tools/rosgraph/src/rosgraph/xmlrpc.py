@@ -94,23 +94,28 @@ class ThreadingXMLRPCServer(socketserver.ThreadingMixIn, SimpleXMLRPCServer):
         # to True to allow quick restart on the same port.  This is equivalent 
         # to calling setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
         self.allow_reuse_address = True
-        SimpleXMLRPCServer.__init__(self, addr, SilenceableXMLRPCRequestHandler, log_requests,  bind_and_activate=False)
-        print('INET in lib/python2.7/dist-packages/ros_comm-1.8.9-py2.7.egg/rosgraph/xmlrpc.py 100')
-        print('converted to INET6')
-        self.address_family = socket.AF_INET6
-        self.socket = socket.socket(self.address_family,
-                                    self.socket_type)
-        print('binding xmlrpc socket to', addr)
-        self.server_bind()
-        self.server_activate()
-        print('bound to', self.socket.getsockname()[0:2])
-        # [Bug #1222790] If possible, set close-on-exec flag; if a
-        # method spawns a subprocess, the subprocess shouldn't have
-        # the listening socket open.
-        if fcntl is not None and hasattr(fcntl, 'FD_CLOEXEC'):
-            flags = fcntl.fcntl(self.fileno(), fcntl.F_GETFD)
-            flags |= fcntl.FD_CLOEXEC
-            fcntl.fcntl(self.fileno(), fcntl.F_SETFD, flags)
+        if rosgraph.network.use_ipv6():
+            # The XMLRPC library does not support IPv6 out of the box
+            # We have to monipulate private members and duplicate
+            # code from the constructor.
+            # TODO: Get this into SimpleXMLRPCServer 
+            SimpleXMLRPCServer.__init__(self, addr, SilenceableXMLRPCRequestHandler, log_requests,  bind_and_activate=False)
+            self.address_family = socket.AF_INET6
+            self.socket = socket.socket(self.address_family,
+                                        self.socket_type)
+            print('binding ipv6 xmlrpc socket to', addr)
+            self.server_bind()
+            self.server_activate()
+            print('bound to', self.socket.getsockname()[0:2])
+            # [Bug #1222790] If possible, set close-on-exec flag; if a
+            # method spawns a subprocess, the subprocess shouldn't have
+            # the listening socket open.
+            if fcntl is not None and hasattr(fcntl, 'FD_CLOEXEC'):
+                flags = fcntl.fcntl(self.fileno(), fcntl.F_GETFD)
+                flags |= fcntl.FD_CLOEXEC
+                fcntl.fcntl(self.fileno(), fcntl.F_SETFD, flags)
+        else:
+            SimpleXMLRPCServer.__init__(self, addr, SilenceableXMLRPCRequestHandler, log_requests)
 
     def handle_error(self, request, client_address):
         """

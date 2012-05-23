@@ -58,7 +58,7 @@ try:
 except ImportError:
     import urlparse
 
-from .rosenv import ROS_IP, ROS_HOSTNAME
+from .rosenv import ROS_IP, ROS_HOSTNAME, ROS_IPV6
 
 SIOCGIFCONF = 0x8912
 SIOCGIFADDR = 0x8915
@@ -120,6 +120,7 @@ def get_address_override():
     :raises: :exc:`ValueError` If ROS_IP/ROS_HOSTNAME/__ip/__hostname are invalidly specified
     """
     # #998: check for command-line remappings first
+    # TODO: check for IPv6 compatibility
     for arg in sys.argv:
         if arg.startswith('__hostname:=') or arg.startswith('__ip:='):
             try:
@@ -234,6 +235,10 @@ def get_local_addresses():
     _local_addrs = local_addrs
     return local_addrs
 
+def use_ipv6():
+    if ROS_IPV6 in os.environ:
+        return True
+    return False
 
 def get_bind_address(address=None):
     """
@@ -245,12 +250,18 @@ def get_bind_address(address=None):
     if address is None:
         address = get_address_override()
     if address and \
-           (address == 'localhost' or address.startswith('127.')):
+           (address == 'localhost' or address.startswith('127.') \
+           or address == '::1' ):
         #localhost or 127/8
-        return '127.0.0.1' #loopback
+        if use_ipv6():
+            return '::1'
+        else:
+            return '127.0.0.1' #loopback
     else:
-        return '::'
-    return ''
+        if use_ipv6():
+            return '::'
+        else:
+            return '0.0.0.0'
 
 # #528: semi-complicated logic for determining XML-RPC URI
 def get_host_name():
