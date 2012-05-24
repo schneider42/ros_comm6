@@ -47,6 +47,7 @@ extern "C" {
 # include <fcntl.h>
 # include <string.h>
 # include <stdlib.h>
+# include <arpa/inet.h>
 }
 #endif  // _WINDOWS
 
@@ -86,12 +87,10 @@ nonFatalError()
   return (err == EINPROGRESS || err == EAGAIN || err == EWOULDBLOCK || err == EINTR);
 }
 
-
-
-int
-XmlRpcSocket::socket()
+bool
+XmlRpcSocket::useIPv6()
 {
-  initWinSock();
+  // TODO: make this check only once at startup
   char *ros_ipv6 = NULL;
   #ifdef _MSC_VER
     _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
@@ -99,6 +98,20 @@ XmlRpcSocket::socket()
     ros_ipv6 = getenv("ROS_IPV6");
   #endif
   if (ros_ipv6)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+int
+XmlRpcSocket::socket()
+{
+  initWinSock();
+  if (useIPv6())
   {
     return (int) ::socket(AF_INET6, SOCK_STREAM, 0);
   }
@@ -217,6 +230,10 @@ XmlRpcSocket::connect(int fd, std::string& host, int port)
   memset(&saddr, 0, sizeof(saddr));
   saddr.sin_family = AF_INET;
 
+  struct sockaddr_in6 v6saddr;
+  memset(&v6saddr, 0, sizeof(v6saddr));
+  saddr.sin_family = AF_INET6;
+
   struct addrinfo* addr;
   if (getaddrinfo(host.c_str(), NULL, NULL, &addr) != 0)
   {
@@ -225,17 +242,40 @@ XmlRpcSocket::connect(int fd, std::string& host, int port)
 
   bool found = false;
   struct addrinfo* it = addr;
+
+  socklen_t len;
+  struct sockaddr *address;
+
   for (; it; it = it->ai_next)
   {
-    if (it->ai_family == AF_INET)
+    if (!useIPv6() && it->ai_family == AF_INET)
     {
       memcpy(&saddr, it->ai_addr, it->ai_addrlen);
       saddr.sin_family = it->ai_family;
       saddr.sin_port = htons((u_short) port);
+      len = sizeof(saddr);
+      address = (sockaddr*) &saddr;
 
+      printf("found host as %s\n", inet_ntoa(saddr.sin_addr));
       found = true;
       break;
     }
+    if (useIPv6() && it->ai_family == AF_INET6)
+    {
+      memcpy(&v6saddr, it->ai_addr, it->ai_addrlen);
+      v6saddr.sin6_family = it->ai_family;
+      v6saddr.sin6_port = htons((u_short) port);
+      len = sizeof(v6saddr);
+      address = (sockaddr*) &v6saddr;
+      
+      char buf[128];
+      // TODO: check if this also works under Windows
+      printf("found ipv6 host as %s\n",
+        inet_ntop(AF_INET6, (void*)&v6saddr.sin6_addr, buf, sizeof(buf)));
+      found = true;
+      break;
+    }
+
   }
 
   if (!found)
@@ -247,7 +287,7 @@ XmlRpcSocket::connect(int fd, std::string& host, int port)
 
   // For asynch operation, this will return EWOULDBLOCK (windows) or
   // EINPROGRESS (linux) and we just need to wait for the socket to be writable...
-  int result = ::connect(fd, (struct sockaddr *)&saddr, sizeof(saddr));
+  int result = ::connect(fd, address, len);
   if (result != 0 ) {
 	  int error = getError();
 	  if ( (error != EINPROGRESS) && error != EWOULDBLOCK) { // actually, should probably do a platform check here, EWOULDBLOCK on WIN32 and EINPROGRESS otherwise

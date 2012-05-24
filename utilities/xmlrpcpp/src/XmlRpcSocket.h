@@ -71,6 +71,10 @@ namespace XmlRpc {
 
     //! Returns message corresponding to error
     static std::string getErrorMsg(int error);
+    
+    //! Returns if the socket should use IPv6
+    static bool useIPv6();
+
   };
 
 } // namespace XmlRpc
