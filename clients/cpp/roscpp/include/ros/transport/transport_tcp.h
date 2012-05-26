@@ -160,6 +160,11 @@ private:
 
   std::string connected_host_;
   int connected_port_;
+
+  //! Returns if the socket should use IPv6
+  static bool useIPv6();
+
+
 };
 
 }

@@ -91,6 +91,7 @@ bool
 XmlRpcSocket::useIPv6()
 {
   // TODO: make this check only once at startup
+  // TODO: make this check only at one place in the code for the whole cpp client
   char *ros_ipv6 = NULL;
   #ifdef _MSC_VER
     _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
