@@ -192,11 +192,40 @@ void TransportTCP::setKeepAlive(bool use, uint32_t idle, uint32_t interval, uint
   }
 }
 
+bool
+TransportTCP::useIPv6()
+{
+  // TODO: make this check only once at startup
+  // TODO: make this check only at one place in the code for the whole cpp client
+  char *ros_ipv6 = NULL;
+  #ifdef _MSC_VER
+    _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
+  #else
+    ros_ipv6 = getenv("ROS_IPV6");
+  #endif
+  if (ros_ipv6)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 bool TransportTCP::connect(const std::string& host, int port)
 {
-  sock_ = socket(AF_INET, SOCK_STREAM, 0);
   connected_host_ = host;
   connected_port_ = port;
+
+  if (useIPv6())
+  {
+    sock_ = socket(AF_INET6, SOCK_STREAM, 0);
+  }
+  else
+  {
+    sock_ = socket(AF_INET, SOCK_STREAM, 0);
+  }
 
   if (sock_ == ROS_INVALID_SOCKET)
   {
@@ -208,6 +237,12 @@ bool TransportTCP::connect(const std::string& host, int port)
 
   sockaddr_in sin;
   sin.sin_family = AF_INET;
+  sockaddr_in6 v6sin;
+  v6sin.sin6_family = AF_INET;
+  socklen_t len;
+  struct sockaddr *address;
+
+  // TODO: handle IPv6 addresses
   if (inet_addr(host.c_str()) == INADDR_NONE)
   {
     struct addrinfo* addr;
@@ -222,12 +257,30 @@ bool TransportTCP::connect(const std::string& host, int port)
     struct addrinfo* it = addr;
     for (; it; it = it->ai_next)
     {
-      if (it->ai_family == AF_INET)
+      if (!useIPv6() && it->ai_family == AF_INET)
       {
         memcpy(&sin, it->ai_addr, it->ai_addrlen);
         sin.sin_family = it->ai_family;
-        sin.sin_port = htons(port);
+        sin.sin_port = htons((u_short) port);
+        len = sizeof(sin);
+        address = (sockaddr*) &sin;
 
+        printf("found host as %s\n", inet_ntoa(sin.sin_addr));
+        found = true;
+        break;
+      }
+      if (useIPv6() && it->ai_family == AF_INET6)
+      {
+        memcpy(&v6sin, it->ai_addr, it->ai_addrlen);
+        v6sin.sin6_family = it->ai_family;
+        v6sin.sin6_port = htons((u_short) port);
+        len = sizeof(v6sin);
+        address = (sockaddr*) &v6sin;
+      
+        char buf[128];
+        // TODO: check if this also works under Windows
+        printf("found ipv6 host as %s\n",
+          inet_ntop(AF_INET6, (void*)&v6sin.sin6_addr, buf, sizeof(buf)));
         found = true;
         break;
       }
@@ -248,9 +301,7 @@ bool TransportTCP::connect(const std::string& host, int port)
     sin.sin_addr.s_addr = inet_addr(host.c_str()); // already an IP addr
   }
 
-  sin.sin_port = htons(port);
-
-  int ret = ::connect(sock_, (sockaddr *)&sin, sizeof(sin));
+  int ret = ::connect(sock_, address, len);
   // windows might need some time to sleep (input from service robotics hack) add this if testing proves it is necessary.
   ROS_ASSERT((flags_ & SYNCHRONOUS) || ret != 0);
   if (((flags_ & SYNCHRONOUS) && ret != 0) || // synchronous, connect() should return 0
