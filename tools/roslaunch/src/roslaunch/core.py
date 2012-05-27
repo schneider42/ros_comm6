@@ -85,6 +85,7 @@ def is_machine_local(machine):
     :returns: True if machine is local and doesn't require remote login, ``bool``
     """    
     try:
+        #TODO: use getaddrinfo for IPv6
         machine_addr = socket.gethostbyname(machine.address)
     except socket.gaierror:
         raise RLException("cannot resolve host address for machine [%s]"%machine.address)

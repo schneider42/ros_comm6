@@ -114,7 +114,7 @@ def get_service_headers(service_name, service_uri):
         try:
             # connect to service and probe it to get the headers
             s.settimeout(5.0)
-            #print('connecting to %s : %d'%(dest_addr, dest_port))
+            print('connecting to %s : %d'%(dest_addr, dest_port))
             s.connect((dest_addr, dest_port))
             header = { 'probe':'1', 'md5sum':'*',
                        'callerid':'/rosservice', 'service':service_name}

@@ -171,6 +171,7 @@ def get_nodes_by_machine(machine):
     
     master = rosgraph.Master(ID)
     try:
+        #TODO: use getaddrinfo for IPv6
         machine_actual = socket.gethostbyname(machine)
     except:
         raise ROSNodeException("cannot resolve machine name [%s] to address"%machine)
@@ -196,6 +197,7 @@ def get_nodes_by_machine(machine):
             elif h in not_matches:
                 continue
             else:
+                #TODO: use getaddrinfo for IPv6
                 r = socket.gethostbyname(h)
                 if r == machine_actual:
                     matches.append(r)

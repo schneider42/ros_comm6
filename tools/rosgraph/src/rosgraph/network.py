@@ -143,6 +143,7 @@ def is_local_address(hostname):
     :returns True: if hostname maps to a local address, False otherwise. False conditions include invalid hostnames.
     """
     try:
+        # TODO: convert to getaddrinfo() for IPv6 compatibility
         reverse_ip = socket.gethostbyname(hostname)
     except socket.error:
         return False
@@ -231,6 +232,7 @@ def get_local_addresses():
                 bufpos += ifreqsize
     else:
         # cross-platform branch, can only resolve one address
+        #TODO: use getaddrinfo for IPv6
         local_addrs = [socket.gethostbyname(socket.gethostname())]
     _local_addrs = local_addrs
     return local_addrs

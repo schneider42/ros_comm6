@@ -155,6 +155,7 @@ def ros_master_uri_hostname(ctx):
         splits = p[1].split(':')
         if len(splits) != 2:
             return #caught by different rule
+        #TODO: use getaddrinfo for IPv6
         socket.gethostbyname(splits[0])
     except socket.gaierror, e:
         return "Unknown host %s"%splits[0]

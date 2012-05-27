@@ -84,6 +84,7 @@ def validate_master_launch(m, is_core, is_rostest=False):
             # only warn if network configuration appears
             # non-local.
             try:
+                #TODO: use getaddrinfo for IPv6
                 reverse_ip = socket.gethostbyname(m.get_host())
                 local_addrs = rosgraph.network.get_local_addresses()
                 printerrlog("""WARNING: IP address %s for local hostname '%s' does not appear to match

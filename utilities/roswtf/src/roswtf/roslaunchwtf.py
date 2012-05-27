@@ -149,6 +149,7 @@ def roslaunch_machine_name_check(ctx):
     bad = []
     for m in machines:
         try:
+            #TODO: use getaddrinfo for IPv6
             socket.gethostbyname(m.address)
         except socket.gaierror:
             bad.append(m.address)

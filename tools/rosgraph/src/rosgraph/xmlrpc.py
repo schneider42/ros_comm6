@@ -104,6 +104,8 @@ class ThreadingXMLRPCServer(socketserver.ThreadingMixIn, SimpleXMLRPCServer):
             self.socket = socket.socket(self.address_family,
                                         self.socket_type)
             print('binding ipv6 xmlrpc socket to', addr)
+            # TODO: set IPV6_V6ONLY to 0:
+            # self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
             self.server_bind()
             self.server_activate()
             print('bound to', self.socket.getsockname()[0:2])
@@ -252,7 +254,8 @@ class XmlRpcNode(object):
             else:
                 try:
                     hostname = socket.gethostname()
-                    if hostname and not hostname == 'localhost' and not hostname.startswith('127.'):
+                    if hostname and not hostname == 'localhost' and not hostname.startswith('127.') \
+                                and not hostname == '::':
                         uri = 'http://%s:%s/'%(hostname, self.port)
                 except:
                     pass
