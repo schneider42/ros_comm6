@@ -261,7 +261,7 @@ bool TransportTCP::connect(const std::string& host, int port)
       {
         memcpy(&sin, it->ai_addr, it->ai_addrlen);
         sin.sin_family = it->ai_family;
-        sin.sin_port = htons((u_short) port);
+        sin.sin_port = htons(port);
         len = sizeof(sin);
         address = (sockaddr*) &sin;
 
@@ -350,13 +350,7 @@ bool TransportTCP::listen(int port, int backlog, const AcceptCallback& accept_cb
   socklen_t len;
   struct sockaddr *address;
 
-  char *ros_ipv6 = NULL;
-  #ifdef _MSC_VER
-    _dupenv_s(&ros_ipv6, NULL, "ROS_IPV6");
-  #else
-    ros_ipv6 = getenv("ROS_IPV6");
-  #endif
-  if (ros_ipv6)
+  if (useIPv6())
   {
     sock_ = socket(AF_INET6, SOCK_STREAM, 0);
     v6server_address_.sin6_family = AF_INET6;
